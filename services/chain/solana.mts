@@ -962,4 +962,9 @@ export class Chain {
 
   async airdrop(to: PublicKey, lamports: bigint): Promise<string> {
     const sig = await this.connection.requestAirdrop(to, Number(lamports));
-    const bh = await this.connection.getLatestBlockhash("confirme
+    const bh = await this.connection.getLatestBlockhash("confirmed");
+    const res = await this.connection.confirmTransaction({ signature: sig, ...bh }, "confirmed");
+    if (res.value.err) throw new Error("airdrop failed");
+    return sig;
+  }
+}
