@@ -1,0 +1,39 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  services:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run roles:check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm run census:test
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            sim
+            program
+      - run: cargo test --manifest-path sim/Cargo.toml --profile ci -- --test-threads=1
+      - run: cargo build --manifest-path sim/Cargo.toml --target wasm32-unknown-unknown --release
+      - run: cargo test --manifest-path program/Cargo.toml --lib

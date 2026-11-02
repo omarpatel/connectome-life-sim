@@ -1,0 +1,32 @@
+[package]
+name = "instar"
+version = "0.1.0"
+description = "Instar: the on-chain world record for a population of larvae driven by the Winding 2023 larval connectome"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "instar"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build"]
+# Test builds only: shrinks the abandonment / escheat / cull timers from days
+# to seconds so a local validator can exercise the recovery paths in real time.
+# Never enable for a deployment.
+short-timers = []
+
+[dependencies]
+anchor-lang = { version = "0.31.0", features = ["init-if-needed"] }
+# Metaplex Core: every larva is a Core asset in the world's collection. The
+# `anchor` feature selects the anchor-lang 0.31 / solana-program 2.x build of
+# the client. 0.11.x is the last line whose companion crate (kaigan) targets
+# anchor-lang 0.31; 0.12 pairs with 0.32 and breaks `anchor idl build`.
+mpl-core = { version = "0.11.1", features = ["anchor"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("custom-heap", "custom-panic", "anchor-debug"))'] }

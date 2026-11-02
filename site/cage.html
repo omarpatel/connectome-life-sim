@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https: http://127.0.0.1:* http://localhost:*; img-src 'self' data: https: http://127.0.0.1:* http://localhost:*; style-src 'self' 'unsafe-inline' https://accounts.google.com; script-src 'self' 'wasm-unsafe-eval' 'sha256-47SYuv52ST9yQ76ncm8OHvWn4zem0EXrZt9l4WuC2XY=' https://accounts.google.com; worker-src 'self'; frame-src https://accounts.google.com; base-uri 'none'; object-src 'none'">
+<title>Instar — the cage</title>
+<meta name="description" content="The live Instar cage: adult Drosophila flies driven by every neuron of the Janelia MaleCNS connectome and every connection of five or more synapses, streamed from the world, with the market and your account.">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="./apple-touch-icon-180.png">
+<link rel="stylesheet" href="./styles.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body class="bench">
+
+<div class="boot" id="boot">reading the world</div>
+<canvas id="cage" aria-label="the cage"></canvas>
+<div class="banner" id="identity-banner" hidden><span id="identity-text"></span> <button id="identity-accept">I expected this</button></div>
+
+<header class="hud">
+  <a class="brand" href="./"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="./mark.svg#m"></use></svg><span>Instar</span></a>
+  <span class="kv">tick <b id="h-tick">&mdash;</b></span>
+  <span class="kv">epoch <b id="h-epoch">&mdash;</b></span>
+  <span class="kv">alive <b id="h-pop">&mdash;</b> / <b id="h-cap">&mdash;</b></span>
+  <span class="kv">flying <b id="h-flying">&mdash;</b></span>
+  <span class="kv">light <b id="h-light">&mdash;</b></span>
+  <span class="kv">temp <b id="h-temp">&mdash;</b></span>
+  <span class="kv" id="h-state"><b>booting</b></span>
+  <span class="spacer"></span>
+  <a class="index" href="./">Home</a>
+  <a class="index" href="./paper.html">Paper</a>
+</header>
+
+<nav class="dock" id="dock">
+  <button data-win="win-market">Market</button>
+  <button data-win="win-flies">Flies</button>
+  <button data-win="win-mine">Mine</button>
+  <button data-win="win-activity">Activity</button>
+  <button data-win="win-brain">Brain</button>
+  <button data-win="win-account">Account</button>
+  <span class="right"><button id="btn-fp">On the glass</button></span>
+</nav>
+<div class="hint" id="hint">drag to orbit &middot; wheel to zoom &middot; click a fly to inspect &middot; double-click to follow it</div>
+<div class="crosshair" id="crosshair"></div>
+<div class="legend3d" id="legend3d">
+  <div class="row"><span>temperature</span><i class="temp"></i><span id="lg-temp">&mdash;</span></div>
+  <div class="row"><span>humidity</span><i class="hum"></i><span>water pool &rarr; salt corner</span></div>
+</div>
+
+<section class="win" id="win-market">
+  <div class="win-head"><span class="t">Market</span><button data-min title="close">&times;</button></div>
+  <div class="win-body">
+    <h4>World</h4>
+    <div class="kv2">
+      <span>cluster</span><span id="m-cluster">&mdash;</span>
+      <span>metabolism</span><span id="m-metab">&mdash;</span>
+      <span>pool</span><span id="m-pool">&mdash;</span>
+      <span>capacity</span><span id="m-cap">&mdash;</span>
+      <span>settlement</span><span id="m-settling">&mdash;</span>
+    </div>
+    <h4>Newborns offered</h4>
+    <div id="m-offers" class="stack"><div class="note">&mdash;</div></div>
+    <h4>Listed by keepers</h4>
+    <div id="m-resale" class="stack"><div class="note">&mdash;</div></div>
+    <div class="msg act-msg" id="m-msg"></div>
+    <div class="note">A purchase pays 60% into the animal's vault, 15% to metabolism, 15% to the pool, 10% to the parent's vault. A resale pays 90% to the seller, 5% and 5% to metabolism and pool; the vault travels with the animal.</div>
+  </div>
+</section>
+
+<section class="win" id="win-flies">
+  <div class="win-head"><span class="t">Flies</span><button data-min title="close">&times;</button></div>
+  <div class="win-body">
+    <div class="note" id="l-summary">&mdash;</div>
+    <div id="l-list" class="stack"></div>
+  </div>
+</section>
+
+<section class="win" id="win-mine">
+  <div class="win-head"><span class="t">Mine</span><button data-min title="close">&times;</button></div>
+  <div class="win-body" id="mine-body"><div class="note">sign in to see the flies you keep</div></div>
+</section>
+
+<section class="win" id="win-activity">
+  <div class="win-head"><span class="t">Activity</span><button data-min title="close">&times;</button></div>
+  <div class="win-body">
+    <h4>In the cage</h4>
+    <div id="a-events" class="stack"></div>
+    <h4>On chain</h4>
+    <div id="a-tx" class="stack"><div class="note">&mdash;</div></div>
+    <h4>Verification</h4>
+    <div class="note" id="v-line">&mdash;</div>
+    <div class="actions"><button id="v-run" hidden>Verify the next epoch in this browser</button><button id="v-run-posted" hidden>Verify a posted epoch</button></div>
+    <div class="msg" id="v-msg"></div>
+    <div class="note" id="v-caption">The CLI verifier (<span class="mono">scripts/verify-epoch.mts</span>) replays the world from a snapshot at native speed in Node and compares the epoch hash with the World account on chain; the operator can post its result to the journal, and that is what the line above reports. The buttons do the same replay here, in a Web Worker: it downloads the graph (~82 MB) and the world's snapshot (~0.7 GB after inflation, streamed straight into the engine's memory), holds about <span data-n="vmem">1</span> GB at its peak (measured on this build: the worker held 0.68 GB, the 611 MB engine image plus the graph tables it keeps to check the restore; the whole tab, cage and all, reached 1.4 GB), and takes a minute or more. &ldquo;The next epoch&rdquo; replays from the latest snapshot to the next boundary and then waits for the world to post it, so the chain is read after the operator has written it, not before; &ldquo;a posted epoch&rdquo; uses the snapshot the world kept from just before an epoch it has already posted, and is compared with the journal&rsquo;s recorded hash and the transaction that posted it, not with the World account, which keeps only the newest epoch. A phone cannot do it, so the buttons are only offered on a desktop browser reporting at least 4 GB of memory.</div>
+  </div>
+</section>
+
+<section class="win" id="win-brain">
+  <div class="win-head"><span class="t">Brain</span><button data-min title="close">&times;</button></div>
+  <div class="win-body">
+    <div class="note" id="b-summary">select a fly to watch its neurons</div>
+    <canvas id="brain-bars" width="480" height="180"></canvas>
+    <div class="note">Neurons that fired at the world's last tick, by role group, as a share of the group's neurons (log scale, so one firing among twenty-four shows next to nine hundred among twelve thousand). Groups are the engine's, from Janelia's annotations.</div>
+    <canvas id="brain-raster" width="512" height="326"></canvas>
+    <div class="note" id="b-caption">&mdash;</div>
+  </div>
+</section>
+
+<section class="win" id="win-inspect">
+  <div class="win-head"><span class="t" id="i-title">Fly</span><button data-min title="close">&times;</button></div>
+  <div class="win-body">
+    <img class="art" id="i-art" alt="" hidden>
+    <div class="kv2" id="i-kv"></div>
+    <div id="i-market"></div>
+    <div class="msg act-msg" id="i-msg"></div>
+  </div>
+</section>
+
+<section class="win" id="win-account">
+  <div class="win-head"><span class="t">Account</span><button data-min title="close">&times;</button></div>
+  <div class="win-body">
+    <div class="modes" id="acct-modes" role="tablist" aria-label="account mode">
+      <button data-mode="custodial" role="tab">Instar account</button>
+      <button data-mode="wallet" role="tab">Your wallet</button>
+    </div>
+    <div id="acct-custodial">
+    <div id="acct-out">
+      <div class="note">Local development world: use test SOL and disposable accounts only.</div>
+      <div class="note">An Instar account is a Solana keypair the world process holds for you, sealed under the operator's master key; your PIN only signs you in. The operator can spend from it: that is a trust assumption, and it is the quick way in. If you would rather hold the key yourself, use <b>Your wallet</b>. You can withdraw everything at any time. If the world is wound down and you have not withdrawn 180 days later, what is left in your Instar account goes where the program's unclaimed funds go: the recovery address.</div>
+      <div class="field"><label for="acct-user">name</label><input id="acct-user" maxlength="24" autocapitalize="off" spellcheck="false" autocomplete="username" placeholder="a name for this account"></div>
+      <div class="field"><label for="acct-pin">pin</label><input id="acct-pin" type="password" maxlength="64" autocomplete="current-password" placeholder="6 or more characters"></div>
+      <div class="actions">
+        <button id="acct-login">Sign in</button>
+        <button id="acct-create" class="quiet">Create</button>
+      </div>
+      <div class="note">Creating is explicit so a mistyped name cannot open a new empty account by accident.</div>
+      <div id="gwrap" hidden><div class="note">or</div><div id="gbtn"></div></div>
+      <div class="msg" id="acct-msg"></div>
+    </div>
+    <div id="acct-in" hidden>
+      <div class="kv2">
+        <span>name</span><span id="acct-name">&mdash;</span>
+        <span>balance</span><span id="acct-balance">&mdash;</span>
+        <span>credit</span><span id="acct-credit">&mdash;</span>
+        <span>keeping</span><span id="acct-owned">&mdash;</span>
+      </div>
+      <h4>Deposit</h4>
+      <div class="note">Send SOL to this address on <span id="acct-cluster">the cluster</span>. The QR is drawn by this page.</div>
+      <canvas class="qr" id="acct-qr" width="148" height="148"></canvas>
+      <div class="addr" id="acct-deposit">&mdash;</div>
+      <div class="actions">
+        <button id="acct-copy" class="quiet">Copy</button>
+        <a id="acct-scan" class="chain" href="#" target="_blank" rel="noopener">explorer</a>
+        <button id="acct-airdrop" hidden>Airdrop 1 SOL</button>
+      </div>
+      <h4>Withdraw</h4>
+      <div class="field"><label for="wd-to">to</label><input id="wd-to" placeholder="Solana address" autocomplete="off"></div>
+      <div class="field"><label for="wd-amt">SOL</label><input id="wd-amt" placeholder="amount, or max" autocomplete="off"></div>
+      <div class="actions"><button id="acct-withdraw">Withdraw</button><button id="acct-logout" class="quiet">Sign out</button></div>
+      <div class="msg" id="acct-msg2"></div>
+    </div>
+    </div>
+    <div id="acct-wallet" hidden>
+      <div id="wal-out">
+        <div class="note">A wallet you already hold: Phantom, Solflare, Backpack or any Wallet Standard wallet in this browser. This page builds each transaction from the program's IDL and your wallet signs it; the world process never sees your key and cannot act for you. Purchases, listings, transfers and cull requests all work this way. Naming a lineage is a journal claim, not a chain action, and needs an Instar account.</div>
+        <div class="actions" id="wal-list"></div>
+        <div class="msg" id="wal-msg"></div>
+      </div>
+      <div id="wal-in" hidden>
+        <div class="kv2">
+          <span>wallet</span><span id="wal-name">&mdash;</span>
+          <span>address</span><span id="wal-addr">&mdash;</span>
+          <span>balance</span><span id="wal-balance">&mdash;</span>
+          <span>credit</span><span id="wal-credit">&mdash;</span>
+          <span>keeping</span><span id="wal-owned">&mdash;</span>
+        </div>
+        <div class="note">Balance and credit are read from <span id="wal-rpc">the RPC</span> by this page. Credit is what the program owes this address from resales, deaths and culls; claiming it is a transaction your wallet signs.</div>
+        <div class="actions">
+          <button id="wal-claim" hidden>Claim credit</button>
+          <a id="wal-scan" class="chain" href="#" target="_blank" rel="noopener">explorer</a>
+          <button id="wal-disconnect" class="quiet">Disconnect</button>
+        </div>
+        <div class="msg act-msg" id="wal-msg2"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="./vendor/web3.js"></script>
+<script type="module" src="./cage.js"></script>
+</body>
+</html>

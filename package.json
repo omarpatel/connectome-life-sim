@@ -1,0 +1,46 @@
+{
+  "name": "connectome-life-sim",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "tsx services/world/index.mts",
+    "world": "tsx services/world/index.mts",
+    "world:init": "tsx scripts/init-world.mts",
+    "sim:build": "node scripts/build-sim.mjs",
+    "sim:probe": "node scripts/sim-probe.mjs",
+    "sim:forage": "node scripts/forage-probe.mjs 12000",
+    "sim:bench": "node scripts/sim-bench.mjs",
+    "sim:gates": "node scripts/sim-gates.mjs",
+    "program:build": "bash scripts/build-program.sh build",
+    "program:test": "bash scripts/build-program.sh test",
+    "localnet": "bash scripts/localnet.sh",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test services/world/*.test.mts",
+    "verify": "tsx scripts/verify.mts",
+    "verify:epoch": "tsx scripts/verify-epoch.mts",
+    "journey": "tsx scripts/journey.mts",
+    "roles:check": "node scripts/roles-check.mjs",
+    "census:test": "python -m unittest tools.census.test_canonical -v",
+    "census:verify": "python -m tools.census verify data/canonical/male-cns-v1.0.census.json"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@metaplex-foundation/mpl-core": "^1.10.0",
+    "@metaplex-foundation/umi": "^1.5.1",
+    "@solana/web3.js": "^1.98.4",
+    "tsx": "^4.23.13"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "bufferutil@4.1.0": true,
+    "utf-8-validate@6.0.6": true
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}

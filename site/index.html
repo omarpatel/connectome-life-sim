@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https: http://127.0.0.1:* http://localhost:*; img-src 'self' data: https: http://127.0.0.1:* http://localhost:*; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval' 'sha256-47SYuv52ST9yQ76ncm8OHvWn4zem0EXrZt9l4WuC2XY=' https://accounts.google.com; worker-src 'self'; frame-src https://accounts.google.com; base-uri 'none'; object-src 'none'">
+<title>Instar — a local connectome-driven world</title>
+<meta name="description" content="A local world of adult fruit flies driven by the Janelia MaleCNS connectome. Observe the cage, inspect neural activity, and replay the simulation.">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="./apple-touch-icon-180.png">
+<link rel="stylesheet" href="./styles.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <a class="mark" href="./">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><use href="./mark.svg#m"></use></svg>
+    <span class="wordmark">Instar</span>
+  </a>
+  <div class="running-head">Adult Drosophila &middot; Janelia MaleCNS v1.0 &middot; Solana</div>
+  <nav>
+    <a href="./cage.html">The cage</a>
+    <a href="#how">How it works</a>
+    <a href="#own">Local accounts</a>
+    <a href="./paper.html">The paper</a>
+    <a href="#faq">Questions</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div>
+    <div class="eyebrow">A local connectome-driven world</div>
+    <h1>A cage of flies,<br>each driven by a complete<br>nervous system <i>wiring diagram.</i></h1>
+    <p class="lede">Scientists mapped the wiring of a fruit fly's nervous system. Instar uses the Janelia MaleCNS dataset in a deterministic model: flies sense their environment, move, feed, reproduce and die under the engine's rules. The wiring is biological data; neuron dynamics and bodies are simplified models.</p>
+    <div class="cta">
+      <a class="btn primary" href="./cage.html">Watch the cage live &rarr;</a>
+      <a class="btn" href="#how">How it works</a>
+      <a class="btn" href="./paper.html">Read the technical account</a>
+    </div>
+  </div>
+  <div class="live-card" id="live-card">
+    <div class="eyebrow">Right now</div>
+    <div class="live-grid">
+      <div><span class="v num" id="lv-pop">&mdash;</span><span class="k">flies alive</span></div>
+      <div><span class="v num" id="lv-cap">&mdash;</span><span class="k">the cage can hold</span></div>
+      <div><span class="v num" id="lv-epoch">&mdash;</span><span class="k">current epoch</span></div>
+      <div><span class="v num" id="lv-tick">&mdash;</span><span class="k">ticks lived</span></div>
+    </div>
+    <div class="live-line" id="lv-state"><b>booting</b></div>
+    <div class="live-line dim" id="lv-chain">&mdash;</div>
+  </div>
+</div>
+
+<figure class="figure" id="live">
+  <div class="fig-head">
+    <span class="fig-label">Figure 1 &middot; the cage, live</span>
+    <span class="status" id="status">
+      <span>cluster <b id="st-cluster">&mdash;</b></span>
+      <span>tick <b id="st-tick" class="num">&mdash;</b></span>
+      <span>alive <b id="st-pop" class="num">&mdash;</b></span>
+      <span>flying <b id="st-flying" class="num">&mdash;</b></span>
+      <span id="st-verify"><b>booting</b></span>
+    </span>
+  </div>
+  <div class="cage-frame">
+    <canvas id="cage" aria-label="the cage"></canvas>
+    <div class="overlay-note" id="cage-note">drag to orbit &middot; click a fly to read it</div>
+    <div class="enter"><a href="./cage.html">Open the full cage &rarr;</a></div>
+  </div>
+  <figcaption>The local world streams the cage and this page draws it: a glass box with food, water, salt and a lamp. Click a fly to read its state; open the full cage to follow it and inspect its neural activity.</figcaption>
+</figure>
+
+<section class="plain" id="plain">
+  <div class="col">
+    <div class="eyebrow">A real brain</div>
+    <h3>The wiring is real. All of it.</h3>
+    <p>In 2026 the Janelia FlyEM team published the complete connectome of an adult male fruit fly: brain, optic lobes and nerve cord, from electron microscopy. Every fly in this cage runs that dataset verbatim: <span data-n="nodes">&mdash;</span> neurons and <span data-n="edges">&mdash;</span> connections of five or more synapses. Nothing about a fly's behaviour is scripted; when one walks to the food, it is the wiring doing it.</p>
+    <a class="more" href="./paper.html#real">What is real and what is not &rarr;</a>
+  </div>
+  <div class="col">
+    <div class="eyebrow">A living cage</div>
+    <h3>It runs whether or not anyone is watching.</h3>
+    <p>One world, ten ticks a second, day and night. Flies find food by smell, walk on the glass, take off under their own wing motor neurons, breed when they can, and die when they run out of energy. The world is deterministic: from a snapshot, anyone can replay it and check that the hash the operator posted to Solana is the truth.</p>
+    <a class="more" href="#verify">How to check it yourself &rarr;</a>
+  </div>
+  <div class="col">
+    <div class="eyebrow">A reproducible world</div>
+    <h3>Inspect the state, not just the picture.</h3>
+    <p>The world publishes its configuration, journal and snapshots. Local Solana accounts record each fly's lifecycle and state commitments; the verifier can replay an epoch and compare the result.</p>
+    <a class="more" href="#verify">Replay and verification &rarr;</a>
+  </div>
+</section>
+
+<section class="sec" id="how">
+  <div class="sec-no"><b>1</b>How it works</div>
+  <div class="sec-body">
+    <h2>A fly's lifecycle and the local ledger.</h2>
+    <p class="lead">The local Solana program tracks creature ownership and accounting. These are simulation mechanics using test SOL, not a token offering or a production deployment. The technical account describes the ledger's rules and custody assumptions.</p>
+    <ol class="steps">
+      <li><b>Born.</b> Two flies with enough energy and the neurosecretory gate open produce a child: its brain is a crossover of its parents' connection weights with a few mutations. The newborn is minted and put on offer at a price that rises with its generation, holds for <span data-n="offerHoldMinutes">&mdash;</span> minutes, then falls over <span data-n="offerDecayMinutes">&mdash;</span> minutes to <span data-n="offerFloorPct">&mdash;</span>% of it, where it stays until someone buys.</li>
+      <li><b>Bought.</b> You pay the offer's price at that moment, never more than the one you saw. 60% goes into the fly's own <b>vault</b>, 15% into the cage's <b>metabolism</b> (which sets how many flies the cage can hold), 15% into the <b>pool</b>, and 10% to its parent's vault.</li>
+      <li><b>Lives.</b> Every <span data-n="rewardEveryEpochs">&mdash;</span> epochs (<span data-n="rewardMinutes">&mdash;</span> minutes) a quarter of the simulated pool is allocated among living flies by points: survival, foraging, energy, age, maturity, births and generation.</li>
+      <li><b>Dies.</b> Starved, exhausted in flight, drowned, old age. The NFT burns. The vault is paid out: 40% split among its living children, 10% credited to you, 35% back to metabolism, 15% to the pool. You can withdraw your credit at any time.</li>
+    </ol>
+    <table class="data">
+      <thead><tr><th>Flow</th><th class="n">Vault</th><th class="n">Metabolism</th><th class="n">Pool</th><th>Other</th></tr></thead>
+      <tbody>
+        <tr><td>buy a newborn</td><td class="n">60%</td><td class="n">15%</td><td class="n">15%</td><td>10% to the parent's vault</td></tr>
+        <tr><td>resale</td><td class="n">&mdash;</td><td class="n">5%</td><td class="n">5%</td><td>90% credited to the seller; the vault travels with the fly</td></tr>
+        <tr><td>death</td><td class="n">&mdash;</td><td class="n">35%</td><td class="n">15%</td><td>40% split among living heirs; 10% credited to the keeper</td></tr>
+        <tr><td>cull</td><td class="n">&mdash;</td><td class="n">15%</td><td class="n">&mdash;</td><td>85% credited to the keeper</td></tr>
+      </tbody>
+    </table>
+    <p class="small dim">The full rules, with the program's account layout, are in <a href="./paper.html#market">the paper, section 4</a> and in <span class="mono">docs/PROGRAM.md</span>.</p>
+  </div>
+  <aside class="sec-margin">
+    <div class="mnote"><b>Live</b>
+      <table class="data" id="econ-table"><tbody>
+        <tr><td>capacity</td><td class="n" id="ec-cap">&mdash;</td></tr>
+        <tr><td>alive on chain</td><td class="n" id="ec-alive">&mdash;</td></tr>
+        <tr><td>settlement</td><td class="n" id="ec-settling">&mdash;</td></tr>
+      </tbody></table>
+    </div>
+    <div class="mnote"><b>Nothing is stranded</b><br>If the operator ever vanished, after 90 days anyone can begin wind-down, every keeper reclaims their vault, and after 180 days what nobody claimed goes to a recovery address fixed when the world was created. <a href="./paper.html#market">More</a>.</div>
+  </aside>
+</section>
+
+<section class="sec" id="own">
+  <div class="sec-no"><b>2</b>Local accounts</div>
+  <div class="sec-body">
+    <h2>Use the local world.</h2>
+    <ol class="steps">
+      <li><b>Open <a href="./cage.html">the cage</a>.</b> Observe without signing in, or create a local Instar account to exercise the ledger. The world holds that account's keypair; alternatively, connect a wallet configured for your local cluster.</li>
+      <li><b>Use test SOL only.</b> The Account window provides an airdrop control on supported test clusters. Never send real funds to this development world. <span id="own-cluster" class="warn" hidden></span></li>
+      <li><b>Buy a newborn from the Market window.</b> It is minted to your wallet as a Core NFT in the Instar collection; holding the asset is what makes you its keeper. From the <i>Mine</i> window you can list it for resale, transfer it, cull it, and withdraw what you are owed; with an Instar account you can also name its lineage.</li>
+    </ol>
+    <div class="split">
+      <div>
+        <div class="eyebrow">Newborns offered now</div>
+        <table class="data" id="offers-table"><tbody><tr><td class="faint">&mdash;</td></tr></tbody></table>
+      </div>
+      <div>
+        <div class="eyebrow">Read this first</div>
+        <p class="small">Flies die<span id="own-lifetime"></span>. Local ledger actions are experimental and an Instar account is custodial: the operator holds its key. Use only disposable development accounts and test funds.</p>
+      </div>
+    </div>
+    <div class="cta"><a class="btn primary" href="./cage.html">Open the cage &rarr;</a></div>
+  </div>
+  <aside class="sec-margin">
+    <div class="mnote"><b>What you get</b><br>A Metaplex Core asset in your wallet, in the Instar collection, with the fly's portrait and live metadata served by the world. A <span class="mono">Creature</span> account on chain: id, parent, generation, birth tick, genome hash, vault, price, status. A share of every child it has.</div>
+    <div class="mnote"><b>What you can do</b><br>Watch it, follow it, read its brain fire by role. Name its lineage. List it for resale at your price. Transfer it like any NFT. Ask the world to cull it. Withdraw your credit.</div>
+  </aside>
+</section>
+
+<section class="sec" id="verify">
+  <div class="sec-no"><b>3</b>Check it yourself</div>
+  <div class="sec-body">
+    <h2>Don't take the operator's word.</h2>
+    <p>Every <span data-n="epoch">&mdash;</span> ticks the engine hashes the whole world: every fly, every position, every neuron it touched. The operator posts that 64-bit hash to the <span class="mono">World</span> account on Solana. Anyone can take the world's snapshot, replay the same ticks on their own machine with the same engine, hash it, and compare with what is on chain. Same bytes, honest world; different bytes, caught.</p>
+    <ol class="steps small">
+      <li>Use this repository and install Node 22 or newer.</li>
+      <li><span class="mono">INSTAR_URL=<span id="vf-url">this site</span> npm run verify:epoch</span> &mdash; it fetches the snapshot, replays one epoch, reads the World account, and prints VERIFIED or MISMATCH.</li>
+      <li>On a desktop with 4 GB free, <a href="./cage.html">the cage page</a> can run the same replay in your browser.</li>
+    </ol>
+    <div class="eyebrow" style="margin-top:22px">What this world is, verifiably</div>
+    <table class="data">
+      <tbody>
+        <tr><td>latest verifier result</td><td class="sig" id="rc-verified">&mdash;</td></tr>
+        <tr><td>latest epoch posted</td><td class="sig" id="rc-epoch">&mdash;</td></tr>
+        <tr><td>program</td><td class="sig" id="rc-program">&mdash;</td></tr>
+        <tr><td>world account</td><td class="sig" id="rc-world">&mdash;</td></tr>
+        <tr><td>collection</td><td class="sig" id="rc-collection">&mdash;</td></tr>
+        <tr><td>source commit running</td><td class="sig" id="rc-commit">&mdash;</td></tr>
+        <tr><td>engine sha-256</td><td class="sig" id="rc-wasm">&mdash;</td></tr>
+        <tr><td>census root (sha-256 Merkle)</td><td class="sig" id="rc-census">&mdash;</td></tr>
+      </tbody>
+    </table>
+    <p class="small dim">The engine hash is of the exact <span class="mono">instar_sim.wasm</span> this world runs and serves; build the commit yourself (<span class="mono">npm run sim:build</span>) and compare. The census root is recomputed by <span class="mono">npm run census:verify</span> from Janelia's published files.</p>
+    <p class="small dim">The last twelve epochs and every transaction the operator sent are listed in <a href="./paper.html#record">the paper, section 5</a>.</p>
+  </div>
+  <aside class="sec-margin">
+    <div class="mnote"><b>Why this matters</b><br>A world that streams pictures could show you anything. This one commits to a hash before you look, and the engine that made it is open. What you see in the cage is what the chain will vouch for.</div>
+  </aside>
+</section>
+
+<section class="sec" id="faq">
+  <div class="sec-no"><b>4</b>Questions</div>
+  <div class="sec-body faq">
+    <details open><summary>Is this AI?</summary><p>No. There is no neural network in the machine-learning sense and no model was trained. Each fly is the published wiring of a real fly's nervous system, run as an integer threshold model. The paper says exactly what is real and what is not.</p></details>
+    <details><summary>Is it really a fly brain?</summary><p>It is really the fly's connectome: which neuron connects to which, and how strongly, for all <span data-n="nodes">&mdash;</span> neurons. What the dataset does not give (how each neuron fires, muscles, a body) the engine supplies with one simple rule for every cell. So: driven by the real wiring, not a simulation of biology. We never say otherwise.</p></details>
+    <details><summary>What happens when my fly dies?</summary><p>Its NFT is burned and its vault is paid out by rule: 40% to its living children, 10% credited to you, the rest back into the cage. Your credit is yours to withdraw whenever you like. With no living children the 40% goes to the cage instead. Death is common<span id="faq-lifetime"></span>.</p></details>
+    <details><summary>Should I use real funds?</summary><p>No. This is a local development world. Use test SOL and disposable development accounts only.</p></details>
+    <details><summary>Who holds my keys?</summary><p>Your choice. With an Instar account the operator holds a keypair for you, sealed under the world's master key; your PIN only signs you in, and the operator can spend from it. That is a trust assumption. With your own wallet, nobody but you: the page builds transactions from the program's IDL and your wallet signs them.</p></details>
+    <details><summary>What if the operator disappears?</summary><p>The program has a way out that needs nobody's permission. After 90 days without an operator action anyone can begin wind-down; keepers reclaim their vaults; 180 days after wind-down began, whatever was not claimed goes to the recovery address, which the operator can change until wind-down begins and never after. The program's own rent can be reclaimed too. No lamport is stranded by design.</p></details>
+    <details><summary>How many flies can the cage hold?</summary><p>Two limits, the smaller wins: the economy's (8 plus 20 per SOL of metabolism, up to 40) and the server's compute budget at 80 ms per tick. Running <span data-n="nodes">&mdash;</span> neurons per fly is expensive; the world measures the cost every epoch and reports the capacity live. The cage refills: when the population has sat below half its capacity for a minute, new founders are born to bring it back, so a bigger metabolism is a fuller cage.</p></details>
+    <details><summary>Can the operator move ledger funds?</summary><p>The operator can move metabolism and pool balances with the public <span class="mono">withdraw_treasury</span> instruction. Creature vaults and keeper credits follow separate program rules. These mechanics are for local test funds only.</p></details>
+    <details><summary>Why did my fly die minutes after I bought it?</summary><p>Flight costs 20&ndash;28&times; what standing does and many flies take off with too little energy to land; founders start hungry. Watch a fly for a while before buying it: its energy, its mode and what it fired are in the inspector.</p></details>
+    <details><summary>Why Solana?</summary><p>The local program records creature lifecycle operations and state commitments. Metaplex Core represents owned creatures as assets.</p></details>
+    <details><summary>What is included?</summary><p>The repository includes the Rust/WebAssembly engine, Anchor program, world process, site, census converter and verifier. The connectome is Janelia's, CC BY 4.0.</p></details>
+  </div>
+  <aside class="sec-margin">
+    <div class="mnote"><b>Read more</b><br><a href="./cage.html">The cage</a> &mdash; the local world<br><a href="./paper.html">The paper</a> &mdash; the technical account</div>
+  </aside>
+</section>
+
+<footer class="colophon">
+  <div class="mono">Instar<br>a local connectome-driven world</div>
+  <div>
+    <p>Data: Janelia FlyEM, MaleCNS v1.0, CC BY 4.0. Berg et al. (2026), <i>Sexual dimorphism in the complete connectome of the Drosophila male central nervous system</i>. The connectome belongs to its authors; nothing here is their endorsement of anything here.</p>
+    <p>Development use only. Use test SOL and disposable accounts.</p>
+  </div>
+  <div class="mono"><a href="./cage.html">the cage</a><br><a href="./paper.html">the paper</a><br><a href="./paper.html#licence">licence</a></div>
+</footer>
+
+</div>
+<script type="module" src="./home.js"></script>
+</body>
+</html>

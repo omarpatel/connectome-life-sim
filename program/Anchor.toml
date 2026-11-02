@@ -1,0 +1,31 @@
+[toolchain]
+anchor_version = "0.31.0"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+instar = "C5WP6JKzcdTyL6z2YFevFpwR7ydgKdMkyhXUapkj6j9S"
+
+[programs.devnet]
+instar = "C5WP6JKzcdTyL6z2YFevFpwR7ydgKdMkyhXUapkj6j9S"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "npm test -- --timeout 1000000"
+
+[test]
+startup_wait = 10000
+shutdown_wait = 2000
+
+[test.validator]
+bind_address = "127.0.0.1"
+ledger = ".anchor/test-ledger"
+rpc_port = 8999
+faucet_port = 9990
+gossip_port = 9199
+dynamic_port_range = "9200-9250"
